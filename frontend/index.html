@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Space Explorer</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="/static/app.js" defer></script>
+</head>
+<body>
+    <main class="workspace">
+        <header class="page-header">
+            <p class="eyebrow">SPACE EXPLORER</p>
+            <h1>A little closer to the cosmos.</h1>
+            <p class="introduction">
+                Explore spacecraft, astronomy, and space missions.
+            </p>
+        </header>
+
+        <section class="panel" aria-labelledby="chat-title">
+            <div class="section-heading">
+                <h2 id="chat-title">Space Chat</h2>
+                <span class="badge">AI assistant</span>
+            </div>
+
+            <p class="muted">
+                Each question is independent. Previous questions are not
+                included in the conversation.
+            </p>
+
+            <form id="chat-form">
+                <label for="message">Your question</label>
+                <textarea
+                    id="message"
+                    name="message"
+                    rows="5"
+                    maxlength="2000"
+                    required
+                    aria-describedby="message-hint"
+                    placeholder="How does a spacecraft enter orbit around Mars?"
+                ></textarea>
+
+                <div class="form-footer">
+                    <span id="message-hint" class="muted">
+                        Maximum 2,000 characters.
+                    </span>
+                    <button id="submit-button" type="submit">
+                        Ask Space Explorer
+                    </button>
+                </div>
+            </form>
+
+            <p id="status" class="status" role="status"></p>
+            <p id="error" class="error" role="alert" hidden></p>
+        </section>
+
+        <section
+            id="answer-panel"
+            class="panel"
+            aria-labelledby="answer-title"
+            aria-busy="false"
+        >
+            <h2 id="answer-title">Answer</h2>
+            <p id="answer" class="answer">
+                Your answer will appear here.
+            </p>
+        </section>
+
+        <footer class="page-footer">
+            AI-generated answers may contain mistakes.
+            Source retrieval is not enabled in this module.
+        </footer>
+    </main>
+</body>
+</html>

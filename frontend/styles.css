@@ -1,0 +1,172 @@
+:root {
+    color-scheme: dark;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: #edf2ff;
+    background: #090e1b;
+    line-height: 1.6;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse at top right, #20345b 0, transparent 55%),
+        #090e1b;
+}
+
+.workspace {
+    width: min(100% - 2rem, 860px);
+    margin: 0 auto;
+    padding: 4rem 0 2rem;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.eyebrow {
+    color: #a5bfff;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+}
+
+h1 {
+    margin: 0.5rem 0;
+    font-size: clamp(2rem, 5vw, 3.4rem);
+    line-height: 1.15;
+    letter-spacing: -0.04em;
+}
+
+h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.introduction,
+.muted,
+.page-footer {
+    color: #b3bfd6;
+}
+
+.panel {
+    margin-bottom: 1.25rem;
+    padding: 1.5rem;
+    border: 1px solid #34415a;
+    border-radius: 18px;
+    background: #111a2b;
+}
+
+.section-heading,
+.form-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.badge {
+    padding: 0.2rem 0.7rem;
+    border: 1px solid #566d9a;
+    border-radius: 999px;
+    color: #c7d7ff;
+    font-size: 0.75rem;
+}
+
+label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+textarea {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    border: 1px solid #566480;
+    border-radius: 10px;
+    color: inherit;
+    background: #0b1220;
+    font: inherit;
+    resize: vertical;
+}
+
+textarea::placeholder {
+    color: #8e9cb6;
+}
+
+textarea:focus-visible,
+button:focus-visible {
+    outline: 3px solid #a5bfff;
+    outline-offset: 3px;
+}
+
+.form-footer {
+    margin-top: 1rem;
+}
+
+button {
+    padding: 0.8rem 1.1rem;
+    border: 0;
+    border-radius: 10px;
+    color: #091225;
+    background: #adc5ff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+    background: #ccdcff;
+}
+
+button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+.status {
+    min-height: 1.6em;
+    margin-bottom: 0;
+    color: #c7d7ff;
+}
+
+.error {
+    padding: 0.8rem;
+    border: 1px solid #bd6875;
+    border-radius: 8px;
+    color: #ffd5db;
+    background: #381d29;
+    overflow-wrap: anywhere;
+}
+
+.answer {
+    margin-bottom: 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.page-footer {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+@media (max-width: 560px) {
+    .workspace {
+        padding-top: 2rem;
+    }
+
+    .panel {
+        padding: 1.1rem;
+    }
+
+    .form-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+}
