@@ -1,3 +1,5 @@
+import mimetypes
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
@@ -10,6 +12,8 @@ from backend.app.core.settings import PROJECT_ROOT, Settings
 def create_app(settings: Settings | None = None) -> FastAPI:
     if settings is None:
         settings = Settings()
+
+    mimetypes.add_type("text/javascript", ".js")
 
     application = FastAPI(
         title=settings.name,

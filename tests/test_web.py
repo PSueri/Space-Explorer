@@ -10,7 +10,7 @@ from backend.app.main import create_app
     [
         ("/", "text/html"),
         ("/static/styles.css", "text/css"),
-        ("/static/app.js", "javascript"),
+        ("/static/app.js", "text/javascript"),
     ],
 )
 def test_frontend_resources_are_available(
@@ -27,4 +27,5 @@ def test_frontend_resources_are_available(
         response = client.get(path)
 
     assert response.status_code == 200
-    assert expected_content_type in response.headers["content-type"]
+    content_type = response.headers["content-type"].split(";")[0].strip()
+    assert content_type == expected_content_type
