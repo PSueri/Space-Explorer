@@ -1,10 +1,8 @@
 from pathlib import Path
-
 from typing import Literal
 
-from pydantic import Field, AnyHttpUrl
+from pydantic import AnyHttpUrl, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
