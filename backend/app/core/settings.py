@@ -1,7 +1,10 @@
 from pathlib import Path
 
-from pydantic import Field
+from typing import Literal
+
+from pydantic import Field, AnyHttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 
@@ -16,3 +19,9 @@ class Settings(BaseSettings):
 
     name: str = Field(default="Space Explorer", min_length=1)
     debug: bool = False
+    llm_provider: Literal["ollama"] = "ollama"
+    llm_model: str = Field(default="qwen3:0.6b", min_length=1)
+    llm_base_url: AnyHttpUrl = AnyHttpUrl("http://localhost:11434")
+    llm_timeout_seconds: float = Field(default=60.0, gt=0, le=300)
+    llm_context_size: int = Field(default=2048, ge=512, le=8192)
+    llm_max_output_tokens: int = Field(default=128, ge=1, le=1024)
