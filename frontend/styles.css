@@ -170,3 +170,14 @@ button:disabled {
         flex-direction: column;
     }
 }
+
+.secondary {
+    margin-top: 1rem;
+    border: 1px solid #566480;
+    color: #c7d7ff;
+    background: transparent;
+}
+
+.secondary:hover:not(:disabled) {
+    background: #20304b;
+}

@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Sequence
 from typing import Literal
 
 import httpx2
@@ -10,6 +11,7 @@ from backend.app.core.exceptions import (
     LLMUnavailableError,
 )
 from backend.app.core.settings import Settings
+from backend.app.models.conversation import ConversationTurn
 
 
 class _OllamaMessage(BaseModel):
@@ -37,13 +39,23 @@ class OllamaClient:
         self,
         system_prompt: str,
         user_message: str,
+        history: Sequence[ConversationTurn] = (),
     ) -> str:
+        messages = [{"role": "system", "content": system_prompt}]
+
+        for turn in history:
+            messages.extend(
+                [
+                    {"role": "user", "content": turn.question},
+                    {"role": "assistant", "content": turn.answer},
+                ]
+            )
+
+        messages.append({"role": "user", "content": user_message})
+
         request_body = {
             "model": self._settings.llm_model,
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_message},
-            ],
+            "messages": messages,
             "stream": False,
             "think": False,
             "options": {

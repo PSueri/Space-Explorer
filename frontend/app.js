@@ -3,16 +3,51 @@
 const form = document.querySelector("#chat-form");
 const messageInput = document.querySelector("#message");
 const submitButton = document.querySelector("#submit-button");
+const resetButton = document.querySelector("#reset-button");
 const statusText = document.querySelector("#status");
 const errorText = document.querySelector("#error");
 const answerText = document.querySelector("#answer");
 const answerPanel = document.querySelector("#answer-panel");
 
+const MAX_HISTORY_TURNS = 2;
+const MAX_HISTORY_CHARACTERS = 2000;
+
+let history = [];
 let isSubmitting = false;
+
+function characterCount(text) {
+    return Array.from(text).length;
+}
+
+function historySize() {
+    return history.reduce(
+        (total, turn) => total
+            + characterCount(turn.question)
+            + characterCount(turn.answer),
+        0,
+    );
+}
+
+function rememberTurn(question, answer) {
+    history.push({ question, answer });
+
+    let shortened = false;
+
+    while (
+        history.length > MAX_HISTORY_TURNS
+        || historySize() > MAX_HISTORY_CHARACTERS
+    ) {
+        history.shift();
+        shortened = true;
+    }
+
+    return shortened;
+}
 
 function setPending(pending) {
     isSubmitting = pending;
     submitButton.disabled = pending;
+    resetButton.disabled = pending;
     messageInput.readOnly = pending;
     answerPanel.setAttribute("aria-busy", String(pending));
     submitButton.textContent = pending
@@ -20,10 +55,29 @@ function setPending(pending) {
         : "Ask Space Explorer";
 }
 
+function clearFeedback() {
+    errorText.hidden = true;
+    errorText.textContent = "";
+    statusText.textContent = "";
+}
+
 function showError(message) {
     errorText.textContent = message;
     errorText.hidden = false;
 }
+
+resetButton.addEventListener("click", () => {
+    if (isSubmitting) {
+        return;
+    }
+
+    history = [];
+    form.reset();
+    clearFeedback();
+    answerText.textContent = "Your answer will appear here.";
+    statusText.textContent = "New conversation started.";
+    messageInput.focus();
+});
 
 form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -32,9 +86,7 @@ form.addEventListener("submit", async (event) => {
         return;
     }
 
-    errorText.hidden = true;
-    errorText.textContent = "";
-    statusText.textContent = "";
+    clearFeedback();
 
     const message = messageInput.value.trim();
 
@@ -54,7 +106,7 @@ form.addEventListener("submit", async (event) => {
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ message }),
+            body: JSON.stringify({ message, history }),
         });
 
         let data;
@@ -77,8 +129,14 @@ form.addEventListener("submit", async (event) => {
             throw new Error("The server returned an empty or invalid answer.");
         }
 
-        answerText.textContent = data.answer;
-        statusText.textContent = "Answer ready.";
+        const answer = data.answer.trim();
+        const shortened = rememberTurn(message, answer);
+
+        answerText.textContent = answer;
+        messageInput.value = "";
+        statusText.textContent = shortened
+            ? "Answer ready. Older context was omitted to keep the conversation small."
+            : "Answer ready.";
     } catch (error) {
         answerText.textContent = "No answer was received.";
         statusText.textContent = "";

@@ -1,3 +1,6 @@
+from collections.abc import Sequence
+
+from backend.app.models.conversation import ConversationTurn
 from backend.app.services.llm import LLMClient
 
 SYSTEM_PROMPT = (
@@ -14,8 +17,13 @@ class ChatService:
     def __init__(self, llm_client: LLMClient) -> None:
         self._llm_client = llm_client
 
-    async def answer(self, message: str) -> str:
+    async def answer(
+        self,
+        message: str,
+        history: Sequence[ConversationTurn] = (),
+    ) -> str:
         return await self._llm_client.generate(
             system_prompt=SYSTEM_PROMPT,
             user_message=message,
+            history=history,
         )

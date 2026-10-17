@@ -1,4 +1,6 @@
 import asyncio
+import json
+from collections.abc import Sequence
 
 import httpx2
 import pytest
@@ -10,10 +12,12 @@ from backend.app.core.exceptions import (
 )
 from backend.app.core.settings import Settings
 from backend.app.integrations.ollama import OllamaClient
+from backend.app.models.conversation import ConversationTurn
 
 
 async def generate_with_transport(
     transport: httpx2.MockTransport,
+    history: Sequence[ConversationTurn] = (),
 ) -> str:
     settings = Settings(
         _env_file=None,
@@ -28,7 +32,11 @@ async def generate_with_transport(
         base_url="http://localhost:11434",
     ) as http_client:
         adapter = OllamaClient(http_client, settings)
-        return await adapter.generate("Answer in English.", "What is an orbiter?")
+        return await adapter.generate(
+            "Answer in English.",
+            "What is an orbiter?",
+            history=history,
+        )
 
 
 @pytest.mark.parametrize(
@@ -77,3 +85,40 @@ def test_adapter_returns_valid_content() -> None:
     answer = asyncio.run(generate_with_transport(httpx2.MockTransport(handler)))
 
     assert answer == "An orbiter circles a celestial body."
+
+
+def test_adapter_preserves_conversation_order() -> None:
+    def handler(request: httpx2.Request) -> httpx2.Response:
+        body = json.loads(request.content)
+
+        assert body["messages"] == [
+            {"role": "system", "content": "Answer in English."},
+            {"role": "user", "content": "What is a lander?"},
+            {"role": "assistant", "content": "A spacecraft that lands."},
+            {"role": "user", "content": "What is an orbiter?"},
+        ]
+
+        return httpx2.Response(
+            200,
+            json={
+                "message": {
+                    "role": "assistant",
+                    "content": "A spacecraft that orbits a celestial body.",
+                },
+                "done": True,
+            },
+        )
+
+    history = [
+        ConversationTurn(
+            question="What is a lander?",
+            answer="A spacecraft that lands.",
+        )
+    ]
+
+    asyncio.run(
+        generate_with_transport(
+            httpx2.MockTransport(handler),
+            history=history,
+        )
+    )

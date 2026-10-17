@@ -8,6 +8,7 @@ from backend.app.core.exceptions import (
     LLMTimeoutError,
     LLMUnavailableError,
 )
+from backend.app.models.conversation import ConversationTurn
 from backend.app.schemas.chat import ChatRequest, ChatResponse
 from backend.app.services.chat import ChatService
 
@@ -20,7 +21,15 @@ async def chat(
     service: Annotated[ChatService, Depends(get_chat_service)],
 ) -> ChatResponse:
     try:
-        answer = await service.answer(payload.message)
+        history = [
+            ConversationTurn(
+                question=turn.question,
+                answer=turn.answer,
+            )
+            for turn in payload.history
+        ]
+
+        answer = await service.answer(payload.message, history)
     except LLMTimeoutError as exc:
         raise HTTPException(
             status_code=504,
