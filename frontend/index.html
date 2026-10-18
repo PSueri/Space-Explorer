@@ -18,6 +18,28 @@
             </p>
         </header>
 
+        <section
+            id="conversation-panel"
+            class="panel"
+            aria-labelledby="conversation-title"
+            aria-busy="false"
+        >
+            <h2 id="conversation-title">Conversation</h2>
+
+            <p id="empty-state" class="muted">
+                Your conversation will appear here.
+            </p>
+
+            <div
+                id="conversation"
+                class="conversation"
+                role="log"
+                aria-label="Conversation messages"
+                aria-live="polite"
+                aria-relevant="additions text"
+            ></div>
+        </section>
+
         <section class="panel" aria-labelledby="chat-title">
             <div class="section-heading">
                 <h2 id="chat-title">Space Chat</h2>
@@ -58,28 +80,6 @@
 
             <p id="status" class="status" role="status"></p>
             <p id="error" class="error" role="alert" hidden></p>
-        </section>
-
-        <section
-            id="conversation-panel"
-            class="panel"
-            aria-labelledby="conversation-title"
-            aria-busy="false"
-        >
-            <h2 id="conversation-title">Conversation</h2>
-
-            <p id="empty-state" class="muted">
-                Your conversation will appear here.
-            </p>
-
-            <div
-                id="conversation"
-                class="conversation"
-                role="log"
-                aria-label="Conversation messages"
-                aria-live="polite"
-                aria-relevant="additions text"
-            ></div>
         </section>
 
         <footer class="page-footer">
