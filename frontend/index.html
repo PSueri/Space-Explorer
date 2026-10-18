@@ -25,9 +25,9 @@
             </div>
 
             <p class="muted">
-                Recent exchanges provide conversation context.
-                Older exchanges may be omitted. Reloading this page clears
-                the conversation.
+                Ask a question or continue the conversation.
+                Only recent exchanges are sent as context.
+                Reloading this page clears the conversation.
             </p>
 
             <form id="chat-form">
@@ -61,15 +61,25 @@
         </section>
 
         <section
-            id="answer-panel"
+            id="conversation-panel"
             class="panel"
-            aria-labelledby="answer-title"
+            aria-labelledby="conversation-title"
             aria-busy="false"
         >
-            <h2 id="answer-title">Answer</h2>
-            <p id="answer" class="answer">
-                Your answer will appear here.
+            <h2 id="conversation-title">Conversation</h2>
+
+            <p id="empty-state" class="muted">
+                Your conversation will appear here.
             </p>
+
+            <div
+                id="conversation"
+                class="conversation"
+                role="log"
+                aria-label="Conversation messages"
+                aria-live="polite"
+                aria-relevant="additions text"
+            ></div>
         </section>
 
         <footer class="page-footer">

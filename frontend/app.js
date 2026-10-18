@@ -6,8 +6,9 @@ const submitButton = document.querySelector("#submit-button");
 const resetButton = document.querySelector("#reset-button");
 const statusText = document.querySelector("#status");
 const errorText = document.querySelector("#error");
-const answerText = document.querySelector("#answer");
-const answerPanel = document.querySelector("#answer-panel");
+const conversationPanel = document.querySelector("#conversation-panel");
+const conversation = document.querySelector("#conversation");
+const emptyState = document.querySelector("#empty-state");
 
 const MAX_HISTORY_TURNS = 2;
 const MAX_HISTORY_CHARACTERS = 2000;
@@ -44,12 +45,32 @@ function rememberTurn(question, answer) {
     return shortened;
 }
 
+function appendMessage(role, text) {
+    const element = document.createElement("article");
+    element.classList.add("message", `message-${role}`);
+
+    const label = document.createElement("h3");
+    label.className = "message-label";
+    label.textContent = role === "user" ? "You" : "Space Explorer";
+
+    const content = document.createElement("p");
+    content.className = "message-content";
+    content.textContent = text;
+
+    element.append(label, content);
+    conversation.append(element);
+    emptyState.hidden = true;
+
+    return { element, content };
+}
+
 function setPending(pending) {
     isSubmitting = pending;
     submitButton.disabled = pending;
     resetButton.disabled = pending;
     messageInput.readOnly = pending;
-    answerPanel.setAttribute("aria-busy", String(pending));
+    conversationPanel.setAttribute("aria-busy", String(pending));
+
     submitButton.textContent = pending
         ? "Preparing your answer..."
         : "Ask Space Explorer";
@@ -72,9 +93,12 @@ resetButton.addEventListener("click", () => {
     }
 
     history = [];
+    conversation.replaceChildren();
+    emptyState.hidden = false;
+
     form.reset();
     clearFeedback();
-    answerText.textContent = "Your answer will appear here.";
+
     statusText.textContent = "New conversation started.";
     messageInput.focus();
 });
@@ -98,7 +122,13 @@ form.addEventListener("submit", async (event) => {
 
     setPending(true);
     statusText.textContent = "Space Explorer is preparing your answer.";
-    answerText.textContent = "Waiting for a response...";
+
+    const userMessage = appendMessage("user", message);
+    const assistantMessage = appendMessage(
+        "assistant",
+        "Preparing your answer...",
+    );
+    assistantMessage.element.classList.add("message-pending");
 
     try {
         const response = await fetch("/chat", {
@@ -132,13 +162,17 @@ form.addEventListener("submit", async (event) => {
         const answer = data.answer.trim();
         const shortened = rememberTurn(message, answer);
 
-        answerText.textContent = answer;
+        assistantMessage.content.textContent = answer;
+        assistantMessage.element.classList.remove("message-pending");
         messageInput.value = "";
+
         statusText.textContent = shortened
-            ? "Answer ready. Older context was omitted to keep the conversation small."
+            ? "Answer ready. Earlier messages remain visible but some are no longer sent as context."
             : "Answer ready.";
     } catch (error) {
-        answerText.textContent = "No answer was received.";
+        userMessage.element.remove();
+        assistantMessage.element.remove();
+        emptyState.hidden = conversation.children.length > 0;
         statusText.textContent = "";
 
         const message = error instanceof TypeError

@@ -144,10 +144,58 @@ button:disabled {
     overflow-wrap: anywhere;
 }
 
-.answer {
-    margin-bottom: 0;
+.conversation {
+    display: grid;
+    gap: 1rem;
+}
+
+.conversation:not(:empty) {
+    margin-top: 1.25rem;
+}
+
+.message {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid #34415a;
+    border-radius: 12px;
+    background: #0b1220;
+}
+
+.message-user {
+    margin-left: 2rem;
+    border-color: #536d9e;
+    background: #1a2b48;
+}
+
+.message-assistant {
+    margin-right: 2rem;
+}
+
+.message-label {
+    margin: 0 0 0.5rem;
+    color: #adc5ff;
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.message-content {
+    margin: 0;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
+}
+
+.message-pending {
+    opacity: 0.7;
+}
+
+@media (max-width: 560px) {
+    .message-user {
+        margin-left: 0.75rem;
+    }
+
+    .message-assistant {
+        margin-right: 0.75rem;
+    }
 }
 
 .page-footer {
