@@ -25,3 +25,5 @@ dist/
 
 # Generated document corpus
 data/corpus/
+# Generated document chunks
+data/chunks/
