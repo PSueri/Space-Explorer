@@ -23,9 +23,9 @@ class ChunkedDocument(BaseModel):
     fetched_url: HttpUrl
     retrieved_at: datetime
     content_hash: str
-    parser_version: Literal["1"]
+    parser_version: Literal["1", "2"]
 
-    chunker_version: Literal["1"] = "1"
+    chunker_version: Literal["1", "2"] = "2"
     chunk_size: int = Field(gt=0)
     overlap: int = Field(ge=0)
     chunks: list[DocumentChunk]

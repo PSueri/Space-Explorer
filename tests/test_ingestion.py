@@ -96,3 +96,35 @@ def test_source_registry_rejects_duplicate_identifiers(tmp_path) -> None:
 
     with pytest.raises(ValueError, match="unique"):
         load_sources(path)
+
+
+def test_extraction_excludes_nasa_trailing_navigation() -> None:
+    html = f"""
+    <main>
+        <h1>Example mission</h1>
+        <p>{ARTICLE_TEXT}</p>
+        <h2>Discover More Topics From NASA</h2>
+        <p>Sun</p>
+        <p>Planets</p>
+    </main>
+    """
+
+    text = extract_main_text(html)
+
+    assert ARTICLE_TEXT in text
+    assert "Discover More Topics From NASA" not in text
+    assert "Sun" not in text
+    assert "Planets" not in text
+
+
+def test_extraction_keeps_navigation_phrase_inside_article_text() -> None:
+    html = f"""
+    <main>
+        <p>{ARTICLE_TEXT}</p>
+        <p>The phrase Discover More Topics From NASA appears in this example.</p>
+    </main>
+    """
+
+    text = extract_main_text(html)
+
+    assert "Discover More Topics From NASA" in text

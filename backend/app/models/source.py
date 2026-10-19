@@ -22,4 +22,4 @@ class SourceDocument(BaseModel):
     retrieved_at: datetime
     content_hash: str
     text: str = Field(min_length=100)
-    parser_version: Literal["1"] = "1"
+    parser_version: Literal["1", "2"] = "2"

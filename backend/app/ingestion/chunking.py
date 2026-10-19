@@ -3,7 +3,7 @@ import hashlib
 from backend.app.models.chunk import ChunkedDocument, DocumentChunk
 from backend.app.models.source import SourceDocument
 
-CHUNKER_VERSION = "1"
+CHUNKER_VERSION = "2"
 
 
 def chunk_document(
@@ -65,7 +65,17 @@ def chunk_document(
         if end == len(text):
             break
 
-        start = end - overlap
+        next_start = end - overlap
+
+        while (
+            next_start < end and next_start > 0 and not text[next_start - 1].isspace()
+        ):
+            next_start += 1
+
+        while next_start < end and text[next_start].isspace():
+            next_start += 1
+
+        start = next_start
 
     return ChunkedDocument(
         source=document.source,

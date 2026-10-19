@@ -1,5 +1,11 @@
 from bs4 import BeautifulSoup
 
+TRAILING_NAVIGATION_HEADINGS = frozenset(
+    {
+        "discover more topics from nasa",
+    }
+)
+
 
 def extract_main_text(html: str) -> str:
     soup = BeautifulSoup(html, "html.parser")
@@ -20,6 +26,12 @@ def extract_main_text(html: str) -> str:
             continue
 
         text = " ".join(element.get_text(" ", strip=True).split())
+
+        if (
+            element.name in {"h1", "h2", "h3", "h4"}
+            and text.casefold() in TRAILING_NAVIGATION_HEADINGS
+        ):
+            break
 
         if text:
             blocks.append(text)

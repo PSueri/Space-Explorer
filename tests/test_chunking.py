@@ -47,9 +47,12 @@ def test_chunks_preserve_complete_text_and_exact_offsets(
     reconstructed = result.chunks[0].text
 
     for previous, current in zip(result.chunks, result.chunks[1:]):
-        assert current.start == previous.end - overlap
+        actual_overlap = previous.end - current.start
+
+        assert 0 <= actual_overlap <= overlap
         assert current.start > previous.start
-        reconstructed += current.text[overlap:]
+
+        reconstructed += current.text[actual_overlap:]
 
     assert reconstructed == document.text
 
@@ -100,3 +103,31 @@ def test_chunking_rejects_content_with_an_incorrect_hash() -> None:
 
     with pytest.raises(ValueError, match="hash"):
         chunk_document(modified)
+
+
+def test_chunks_start_at_word_boundaries_for_normal_prose() -> None:
+    document = make_document("Example mission text with several different words. " * 80)
+
+    result = chunk_document(document, chunk_size=300, overlap=70)
+
+    for chunk in result.chunks[1:]:
+        assert document.text[chunk.start - 1].isspace()
+        assert not chunk.text[0].isspace()
+
+
+def test_long_unbroken_text_preserves_coverage() -> None:
+    document = make_document("A" * 2500)
+
+    result = chunk_document(document, chunk_size=1000, overlap=150)
+
+    assert "".join(chunk.text for chunk in result.chunks) == document.text
+    assert all(len(chunk.text) <= 1000 for chunk in result.chunks)
+
+
+def test_new_chunks_record_processing_versions() -> None:
+    document = make_document("Example mission content. " * 100)
+
+    result = chunk_document(document)
+
+    assert result.parser_version == document.parser_version
+    assert result.chunker_version == "2"
