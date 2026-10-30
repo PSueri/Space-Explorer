@@ -229,3 +229,71 @@ button:disabled {
 .secondary:hover:not(:disabled) {
     background: #20304b;
 }
+
+[hidden] {
+    display: none !important;
+}
+
+.module-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.module-navigation button[aria-pressed="false"] {
+    border: 1px solid #566480;
+    color: #c7d7ff;
+    background: transparent;
+}
+
+.module-navigation button[aria-pressed="false"]:hover {
+    background: #20304b;
+}
+
+.source-list {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.source-card {
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid #34415a;
+    border-radius: 10px;
+    background: #0b1220;
+}
+
+.source-title {
+    margin: 0 0 0.75rem;
+    font-size: 0.95rem;
+}
+
+.source-card a {
+    color: #adc5ff;
+    overflow-wrap: anywhere;
+    text-underline-offset: 0.2em;
+}
+
+.source-card a:hover {
+    color: #dbe6ff;
+}
+
+.source-card summary {
+    color: #c7d7ff;
+    cursor: pointer;
+}
+
+.source-card summary:focus-visible,
+.source-card a:focus-visible {
+    outline: 3px solid #a5bfff;
+    outline-offset: 3px;
+}
+
+.source-excerpt {
+    margin-bottom: 0;
+    color: #b3bfd6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}

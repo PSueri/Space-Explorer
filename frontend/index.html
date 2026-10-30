@@ -7,6 +7,7 @@
     <link rel="icon" href="data:,">
     <link rel="stylesheet" href="/static/styles.css">
     <script src="/static/app.js" defer></script>
+    <script src="/static/sources.js" type="module"></script>
 </head>
 <body>
     <main class="workspace">
@@ -17,74 +18,150 @@
                 Explore spacecraft, astronomy, and space missions.
             </p>
         </header>
-
-        <section
-            id="conversation-panel"
-            class="panel"
-            aria-labelledby="conversation-title"
-            aria-busy="false"
-        >
-            <h2 id="conversation-title">Conversation</h2>
-
-            <p id="empty-state" class="muted">
-                Your conversation will appear here.
-            </p>
-
-            <div
-                id="conversation"
-                class="conversation"
-                role="log"
-                aria-label="Conversation messages"
-                aria-live="polite"
-                aria-relevant="additions text"
-            ></div>
-        </section>
-
-        <section class="panel" aria-labelledby="chat-title">
-            <div class="section-heading">
-                <h2 id="chat-title">Space Chat</h2>
-                <span class="badge">AI assistant</span>
-            </div>
-
-            <p class="muted">
-                Ask a question or continue the conversation.
-                Only recent exchanges are sent as context.
-                Reloading this page clears the conversation.
-            </p>
-
-            <form id="chat-form">
-                <label for="message">Your question</label>
-                <textarea
-                    id="message"
-                    name="message"
-                    rows="5"
-                    maxlength="2000"
-                    required
-                    aria-describedby="message-hint"
-                    placeholder="How does a spacecraft enter orbit around Mars?"
-                ></textarea>
-
-                <div class="form-footer">
-                    <span id="message-hint" class="muted">
-                        Maximum 2,000 characters.
-                    </span>
-                    <button id="submit-button" type="submit">
-                        Ask Space Explorer
-                    </button>
-                </div>
-            </form>
-
-            <button id="reset-button" class="secondary" type="button">
-                New conversation
+        <nav class="module-navigation" aria-label="Modules">
+            <button
+                id="chat-module-button"
+                type="button"
+                aria-pressed="true"
+            >
+                Space Chat
             </button>
+            <button
+                id="sources-module-button"
+                type="button"
+                aria-pressed="false"
+            >
+                Ask the Sources
+            </button>
+        </nav>
 
-            <p id="status" class="status" role="status"></p>
-            <p id="error" class="error" role="alert" hidden></p>
-        </section>
+        <div id="chat-module">
+            <section
+                id="conversation-panel"
+                class="panel"
+                aria-labelledby="conversation-title"
+                aria-busy="false"
+            >
+                <h2 id="conversation-title">Conversation</h2>
+
+                <p id="empty-state" class="muted">
+                    Your conversation will appear here.
+                </p>
+
+                <div
+                    id="conversation"
+                    class="conversation"
+                    role="log"
+                    aria-label="Conversation messages"
+                    aria-live="polite"
+                    aria-relevant="additions text"
+                ></div>
+            </section>
+
+            <section class="panel" aria-labelledby="chat-title">
+                <div class="section-heading">
+                    <h2 id="chat-title">Space Chat</h2>
+                    <span class="badge">AI assistant</span>
+                </div>
+
+                <p class="muted">
+                    Ask a question or continue the conversation.
+                    Only recent exchanges are sent as context.
+                    Reloading this page clears the conversation.
+                </p>
+
+                <form id="chat-form">
+                    <label for="message">Your question</label>
+                    <textarea
+                        id="message"
+                        name="message"
+                        rows="5"
+                        maxlength="2000"
+                        required
+                        aria-describedby="message-hint"
+                        placeholder="How does a spacecraft enter orbit around Mars?"
+                    ></textarea>
+
+                    <div class="form-footer">
+                        <span id="message-hint" class="muted">
+                            Maximum 2,000 characters.
+                        </span>
+                        <button id="submit-button" type="submit">
+                            Ask Space Explorer
+                        </button>
+                    </div>
+                </form>
+
+                <button id="reset-button" class="secondary" type="button">
+                    New conversation
+                </button>
+
+                <p id="status" class="status" role="status"></p>
+                <p id="error" class="error" role="alert" hidden></p>
+            </section>
+        </div>
+        <div id="sources-module" hidden>
+            <section
+                id="sources-result"
+                class="panel"
+                aria-labelledby="sources-result-title"
+                hidden
+            >
+                <h2 id="sources-result-title">Answer</h2>
+                <p id="sources-question" class="muted"></p>
+                <p id="sources-answer" class="message-content"></p>
+                <div id="sources-citations" class="source-list"></div>
+            </section>
+
+            <section class="panel" aria-labelledby="sources-title">
+                <h2 id="sources-title">Ask the Sources</h2>
+
+                <p class="muted">
+                    Ask a question about the available mission documents.
+                    Each question is independent.
+                </p>
+
+                <form id="sources-form">
+                    <label for="sources-question-input">Your question</label>
+                    <textarea
+                        id="sources-question-input"
+                        name="question"
+                        rows="4"
+                        maxlength="500"
+                        required
+                        aria-describedby="sources-question-hint"
+                        placeholder="Where did the Huygens probe land?"
+                    ></textarea>
+
+                    <div class="form-footer">
+                        <span id="sources-question-hint" class="muted">
+                            Maximum 500 characters.
+                        </span>
+                        <button id="sources-submit-button" type="submit">
+                            Ask the Sources
+                        </button>
+                    </div>
+                </form>
+
+                <p
+                    id="sources-feedback"
+                    class="status"
+                    role="status"
+                ></p>
+
+                <p
+                    id="sources-error"
+                    class="error"
+                    role="alert"
+                    hidden
+                ></p>
+            </section>
+        </div>
 
         <footer class="page-footer">
             AI-generated answers may contain mistakes.
-            Source retrieval is not enabled in this module.
+            Space Chat uses model knowledge.
+            Ask the Sources provides passages you can inspect.
         </footer>
     </main>
 </body>

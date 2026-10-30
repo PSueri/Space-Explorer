@@ -11,6 +11,7 @@ from backend.app.main import create_app
         ("/", "text/html"),
         ("/static/styles.css", "text/css"),
         ("/static/app.js", "text/javascript"),
+        ("/static/sources.js", "text/javascript"),
     ],
 )
 def test_frontend_resources_are_available(
