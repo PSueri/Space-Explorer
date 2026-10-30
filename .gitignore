@@ -27,3 +27,5 @@ dist/
 data/corpus/
 # Generated document chunks
 data/chunks/
+# Vector Database
+data/vector-index/

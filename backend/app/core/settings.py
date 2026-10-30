@@ -23,3 +23,6 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = Field(default=60.0, gt=0, le=300)
     llm_context_size: int = Field(default=2048, ge=512, le=8192)
     llm_max_output_tokens: int = Field(default=128, ge=1, le=1024)
+    embedding_model: str = Field(default="all-minilm:22m", min_length=1)
+    embedding_base_url: AnyHttpUrl = AnyHttpUrl("http://localhost:11434")
+    embedding_timeout_seconds: float = Field(default=60.0, gt=0, le=300)
