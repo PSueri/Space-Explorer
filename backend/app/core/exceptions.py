@@ -8,3 +8,7 @@ class LLMTimeoutError(Exception):
 
 class LLMResponseError(Exception):
     """The model provider returned an invalid response."""
+
+
+class RetrievalUnavailableError(Exception):
+    """The document index or embedding provider is unavailable."""

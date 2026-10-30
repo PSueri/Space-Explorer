@@ -8,6 +8,7 @@ from backend.app.core.settings import Settings
 from backend.app.integrations.ollama import OllamaClient
 from backend.app.services.chat import ChatService
 from backend.app.services.llm import LLMClient
+from backend.app.services.rag import RagService
 
 
 async def get_llm_client(request: Request) -> AsyncIterator[LLMClient]:
@@ -25,3 +26,13 @@ def get_chat_service(
     llm_client: Annotated[LLMClient, Depends(get_llm_client)],
 ) -> ChatService:
     return ChatService(llm_client)
+
+
+def get_rag_service(
+    request: Request,
+    llm_client: Annotated[LLMClient, Depends(get_llm_client)],
+) -> RagService:
+    return RagService(
+        llm_client=llm_client,
+        retriever=request.app.state.document_retriever,
+    )
