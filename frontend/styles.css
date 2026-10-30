@@ -10,6 +10,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     margin: 0;
     min-height: 100vh;
@@ -129,6 +133,57 @@ button:disabled {
     cursor: wait;
 }
 
+.secondary {
+    margin-top: 1rem;
+    border: 1px solid #566480;
+    color: #c7d7ff;
+    background: transparent;
+}
+
+.secondary:hover:not(:disabled) {
+    background: #20304b;
+}
+
+.module-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+#chat-module-button,
+#sources-module-button {
+    border: 2px solid transparent;
+}
+
+#chat-module-button[aria-pressed="true"],
+#sources-module-button[aria-pressed="true"] {
+    color: #091225;
+    background: #adc5ff;
+    border-color: #adc5ff;
+    box-shadow: inset 0 -3px 0 #365588;
+}
+
+#chat-module-button[aria-pressed="true"]:hover,
+#sources-module-button[aria-pressed="true"]:hover {
+    background: #ccdcff;
+    border-color: #ccdcff;
+}
+
+#chat-module-button[aria-pressed="false"],
+#sources-module-button[aria-pressed="false"] {
+    color: #c7d7ff;
+    background: #111a2b;
+    border-color: #566480;
+    box-shadow: none;
+}
+
+#chat-module-button[aria-pressed="false"]:hover,
+#sources-module-button[aria-pressed="false"]:hover {
+    background: #20304b;
+    border-color: #adc5ff;
+}
+
 .status {
     min-height: 1.6em;
     margin-bottom: 0;
@@ -188,86 +243,6 @@ button:disabled {
     opacity: 0.7;
 }
 
-@media (max-width: 560px) {
-    .message-user {
-        margin-left: 0.75rem;
-    }
-
-    .message-assistant {
-        margin-right: 0.75rem;
-    }
-}
-
-.page-footer {
-    padding: 0.5rem;
-    font-size: 0.85rem;
-    text-align: center;
-}
-
-@media (max-width: 560px) {
-    .workspace {
-        padding-top: 2rem;
-    }
-
-    .panel {
-        padding: 1.1rem;
-    }
-
-    .form-footer {
-        align-items: stretch;
-        flex-direction: column;
-    }
-}
-
-.secondary {
-    margin-top: 1rem;
-    border: 1px solid #566480;
-    color: #c7d7ff;
-    background: transparent;
-}
-
-.secondary:hover:not(:disabled) {
-    background: #20304b;
-}
-
-[hidden] {
-    display: none !important;
-}
-
-.module-navigation {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    margin-bottom: 1.5rem;
-}
-
-.module-navigation button {
-    border: 2px solid transparent;
-}
-
-.module-navigation button[aria-pressed="true"] {
-    color: #091225;
-    background: #adc5ff;
-    border-color: #adc5ff;
-    box-shadow: inset 0 -3px 0 #365588;
-}
-
-.module-navigation button[aria-pressed="true"]:hover {
-    background: #ccdcff;
-    border-color: #ccdcff;
-}
-
-.module-navigation button[aria-pressed="false"] {
-    color: #c7d7ff;
-    background: #111a2b;
-    border-color: #566480;
-}
-
-.module-navigation button[aria-pressed="false"]:hover {
-    background: #20304b;
-    border-color: #adc5ff;
-}
-
 .source-list {
     display: grid;
     gap: 0.75rem;
@@ -315,29 +290,31 @@ button:disabled {
     overflow-wrap: anywhere;
 }
 
-#chat-module-button,
-#sources-module-button {
-    border: 2px solid transparent;
+.page-footer {
+    padding: 0.5rem;
+    font-size: 0.85rem;
+    text-align: center;
 }
 
-#chat-module-button[aria-pressed="true"],
-#sources-module-button[aria-pressed="true"] {
-    color: #091225;
-    background: #adc5ff;
-    border-color: #adc5ff;
-    box-shadow: inset 0 -3px 0 #365588;
-}
+@media (max-width: 560px) {
+    .workspace {
+        padding-top: 2rem;
+    }
 
-#chat-module-button[aria-pressed="false"],
-#sources-module-button[aria-pressed="false"] {
-    color: #c7d7ff;
-    background: #111a2b;
-    border-color: #566480;
-    box-shadow: none;
-}
+    .panel {
+        padding: 1.1rem;
+    }
 
-#chat-module-button[aria-pressed="false"]:hover,
-#sources-module-button[aria-pressed="false"]:hover {
-    background: #20304b;
-    border-color: #adc5ff;
+    .form-footer {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .message-user {
+        margin-left: 0.75rem;
+    }
+
+    .message-assistant {
+        margin-right: 0.75rem;
+    }
 }
