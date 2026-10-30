@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from backend.app.models.retrieval import SearchResult
+from backend.app.models.retrieval import RetrievalBatch
 
 
 class DocumentRetriever(Protocol):
@@ -8,4 +8,4 @@ class DocumentRetriever(Protocol):
         self,
         question: str,
         limit: int = 2,
-    ) -> list[SearchResult]: ...
+    ) -> RetrievalBatch: ...

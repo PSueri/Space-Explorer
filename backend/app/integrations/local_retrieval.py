@@ -7,7 +7,7 @@ from qdrant_client import QdrantClient
 from backend.app.core.exceptions import RetrievalUnavailableError
 from backend.app.core.settings import PROJECT_ROOT, Settings
 from backend.app.integrations.ollama_embeddings import OllamaEmbeddingClient
-from backend.app.models.retrieval import IndexManifest, SearchResult
+from backend.app.models.retrieval import IndexManifest, RetrievalBatch
 from backend.app.repositories.qdrant import QdrantRepository
 
 
@@ -29,7 +29,7 @@ class LocalDocumentRetriever:
         self,
         question: str,
         limit: int = 2,
-    ) -> list[SearchResult]:
+    ) -> RetrievalBatch:
         try:
             with self._lock:
                 return self._search(question, limit)
@@ -42,7 +42,7 @@ class LocalDocumentRetriever:
         self,
         question: str,
         limit: int,
-    ) -> list[SearchResult]:
+    ) -> RetrievalBatch:
         manifest_path = self._index_directory / "current.json"
         database_path = self._index_directory / "database"
 
@@ -77,6 +77,8 @@ class LocalDocumentRetriever:
 
         try:
             repository = QdrantRepository(client, manifest.collection_name)
-            return repository.search(vector, limit=limit)
+            results = repository.search(vector, limit=limit)
         finally:
             client.close()
+
+        return RetrievalBatch(results=results, index_manifest=manifest)

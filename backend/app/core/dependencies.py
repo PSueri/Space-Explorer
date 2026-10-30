@@ -35,4 +35,5 @@ def get_rag_service(
     return RagService(
         llm_client=llm_client,
         retriever=request.app.state.document_retriever,
+        settings=request.app.state.settings,
     )

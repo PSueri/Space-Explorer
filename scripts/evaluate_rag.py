@@ -1,7 +1,9 @@
 import argparse
 import json
+import platform
 import sys
 from datetime import UTC, datetime
+from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 from time import perf_counter
 
@@ -13,10 +15,32 @@ from evaluations.checks import (
     EvaluationCase,
     EvaluationDataset,
     evaluate_response,
+    matches_all,
 )
 
 DEFAULT_DATASET = PROJECT_ROOT / "evaluations" / "cassini_rag.json"
 DEFAULT_OUTPUT_DIRECTORY = PROJECT_ROOT / "data" / "evaluation-reports"
+
+
+def client_environment() -> dict:
+    packages = {}
+
+    for package in (
+        "fastapi",
+        "httpx2",
+        "pydantic",
+        "pydantic-settings",
+        "qdrant-client",
+    ):
+        try:
+            packages[package] = version(package)
+        except PackageNotFoundError:
+            packages[package] = None
+
+    return {
+        "python": platform.python_version(),
+        "packages": packages,
+    }
 
 
 def run_case(
@@ -33,6 +57,10 @@ def run_case(
         "reference_answer": case.reference_answer,
         "http_status": None,
         "response": None,
+        "diagnostics": None,
+        "retrieval_checks": {
+            "expected_evidence_patterns_in_retrieved_passages": None,
+        },
         "checks": {},
         "automatic_checks_passed": False,
         "error": None,
@@ -55,9 +83,24 @@ def run_case(
         payload = AskSourcesResponse.model_validate(response.json())
         checks = evaluate_response(case, payload)
 
-        result["response"] = payload.model_dump(mode="json")
+        result["response"] = payload.model_dump(
+            mode="json",
+            exclude={"diagnostics"},
+        )
         result["checks"] = checks
         result["automatic_checks_passed"] = all(checks.values())
+
+        if payload.diagnostics is not None:
+            result["diagnostics"] = payload.diagnostics.model_dump(mode="json")
+
+            if case.evidence_patterns:
+                retrieved_text = "\n\n".join(
+                    item.record.chunk.text
+                    for item in payload.diagnostics.retrieval.results
+                )
+                result["retrieval_checks"][
+                    "expected_evidence_patterns_in_retrieved_passages"
+                ] = matches_all(case.evidence_patterns, retrieved_text)
     except httpx2.TimeoutException:
         result["error"] = "The API request timed out."
     except httpx2.HTTPStatusError as exc:
@@ -89,17 +132,10 @@ def save_report(report: dict, directory: Path) -> Path:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Evaluate Ask the Sources against a curated question dataset."
+        description="Evaluate Ask the Sources and collect optional RAG diagnostics."
     )
-    parser.add_argument(
-        "--dataset",
-        type=Path,
-        default=DEFAULT_DATASET,
-    )
-    parser.add_argument(
-        "--base-url",
-        default="http://127.0.0.1:8000",
-    )
+    parser.add_argument("--dataset", type=Path, default=DEFAULT_DATASET)
+    parser.add_argument("--base-url", default="http://127.0.0.1:8000")
     parser.add_argument(
         "--output-directory",
         type=Path,
@@ -132,20 +168,31 @@ def main() -> int:
                     if result["automatic_checks_passed"]
                     else "CHECKS FAIL"
                 )
+                diagnostics_label = (
+                    "captured" if result["diagnostics"] is not None else "unavailable"
+                )
 
-                print(f"{label}: {case.case_id} ({result['duration_seconds']:.3f}s)")
+                print(
+                    f"{label}: {case.case_id} "
+                    f"({result['duration_seconds']:.3f}s, "
+                    f"diagnostics: {diagnostics_label})"
+                )
 
         passed = sum(result["automatic_checks_passed"] is True for result in results)
+        captured = sum(result["diagnostics"] is not None for result in results)
 
         report = {
+            "report_version": "2",
             "dataset": dataset.model_dump(mode="json"),
             "api_base_url": arguments.base_url,
+            "evaluation_client_environment": client_environment(),
             "started_at": started_at.isoformat(),
             "finished_at": datetime.now(UTC).isoformat(),
             "summary": {
                 "total_cases": len(results),
                 "automatic_checks_passed": passed,
                 "automatic_checks_failed": len(results) - passed,
+                "diagnostics_captured": captured,
                 "manual_reviews_pending": len(results),
             },
             "results": results,
@@ -154,8 +201,15 @@ def main() -> int:
         destination = save_report(report, arguments.output_directory)
 
         print(f"\nAutomatic checks passed: {passed}/{len(results)}")
+        print(f"Diagnostics captured: {captured}/{len(results)}")
         print(f"Report: {destination}")
         print("Manual review is required to assess factual correctness and support.")
+
+        if captured < len(results):
+            print(
+                "Some requests have no diagnostics. For successful API calls, "
+                "enable APP_RAG_DIAGNOSTICS_ENABLED and restart the backend."
+            )
 
         return 0 if passed == len(results) else 1
     except (httpx2.HTTPError, ValueError, OSError) as exc:

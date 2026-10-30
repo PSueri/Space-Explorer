@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from typing import Literal
 
 import httpx2
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, Field, field_validator
 
 from backend.app.core.exceptions import (
     LLMResponseError,
@@ -12,18 +12,29 @@ from backend.app.core.exceptions import (
 )
 from backend.app.core.settings import Settings
 from backend.app.models.conversation import ConversationTurn
+from backend.app.models.generation import GenerationResult
 
 
 class _OllamaMessage(BaseModel):
-    model_config = ConfigDict(str_strip_whitespace=True)
-
     role: Literal["assistant"]
     content: str = Field(min_length=1)
+
+    @field_validator("content")
+    @classmethod
+    def reject_blank_content(cls, content: str) -> str:
+        if not content.strip():
+            raise ValueError("The model returned blank content.")
+
+        return content
 
 
 class _OllamaResponse(BaseModel):
     message: _OllamaMessage
     done: Literal[True]
+    model: str | None = None
+    done_reason: str | None = None
+    prompt_eval_count: int | None = Field(default=None, ge=0)
+    eval_count: int | None = Field(default=None, ge=0)
 
 
 class OllamaClient:
@@ -41,6 +52,19 @@ class OllamaClient:
         user_message: str,
         history: Sequence[ConversationTurn] = (),
     ) -> str:
+        result = await self.generate_with_details(
+            system_prompt,
+            user_message,
+            history,
+        )
+        return result.answer.strip()
+
+    async def generate_with_details(
+        self,
+        system_prompt: str,
+        user_message: str,
+        history: Sequence[ConversationTurn] = (),
+    ) -> GenerationResult:
         messages = [{"role": "system", "content": system_prompt}]
 
         for turn in history:
@@ -76,7 +100,13 @@ class OllamaClient:
             raise LLMTimeoutError("Model request timed out.") from exc
         except httpx2.HTTPError as exc:
             raise LLMUnavailableError("Model provider is unavailable.") from exc
-        except (ValueError, ValidationError) as exc:
+        except ValueError as exc:
             raise LLMResponseError("Model provider returned invalid data.") from exc
 
-        return payload.message.content
+        return GenerationResult(
+            answer=payload.message.content,
+            model=payload.model,
+            done_reason=payload.done_reason,
+            prompt_eval_count=payload.prompt_eval_count,
+            eval_count=payload.eval_count,
+        )

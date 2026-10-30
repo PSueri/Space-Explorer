@@ -31,3 +31,8 @@ class IndexManifest(BaseModel):
     embedding_digest: str
     vector_dimension: int = Field(gt=0)
     created_at: datetime
+
+
+class RetrievalBatch(BaseModel):
+    results: list[SearchResult]
+    index_manifest: IndexManifest | None = None

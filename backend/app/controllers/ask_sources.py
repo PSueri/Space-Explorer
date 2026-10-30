@@ -16,7 +16,11 @@ from backend.app.services.rag import RagService
 router = APIRouter(tags=["sources"])
 
 
-@router.post("/ask-sources", response_model=AskSourcesResponse)
+@router.post(
+    "/ask-sources",
+    response_model=AskSourcesResponse,
+    response_model_exclude_none=True,
+)
 async def ask_sources(
     payload: AskSourcesRequest,
     service: Annotated[RagService, Depends(get_rag_service)],
