@@ -29,3 +29,5 @@ data/corpus/
 data/chunks/
 # Vector Database
 data/vector-index/
+# Evalutation reports
+data/evaluation-reports/
