@@ -29,4 +29,8 @@ class Settings(BaseSettings):
     embedding_base_url: AnyHttpUrl = AnyHttpUrl("http://localhost:11434")
     embedding_timeout_seconds: float = Field(default=60.0, gt=0, le=300)
 
+    embedding_document_prefix: str = ""
+    embedding_query_prefix: str = ""
+    embedding_context_size: int = Field(default=512, ge=128, le=8192)
+
     rag_diagnostics_enabled: bool = False

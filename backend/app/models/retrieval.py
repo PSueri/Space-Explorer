@@ -32,6 +32,10 @@ class IndexManifest(BaseModel):
     vector_dimension: int = Field(gt=0)
     created_at: datetime
 
+    document_prefix: str = ""
+    query_prefix: str = ""
+    embedding_context_size: int = Field(default=512, gt=0)
+
 
 class RetrievalBatch(BaseModel):
     results: list[SearchResult]

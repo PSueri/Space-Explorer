@@ -6,6 +6,7 @@ from uuid import uuid4
 import httpx2
 from qdrant_client import QdrantClient
 
+from backend.app.core.index_configuration import validate_index_configuration
 from backend.app.core.settings import PROJECT_ROOT, Settings
 from backend.app.integrations.ollama_embeddings import OllamaEmbeddingClient
 from backend.app.models.chunk import ChunkedDocument
@@ -73,7 +74,7 @@ def build_index(
 ) -> None:
     records = load_records()
     digest = embedder.model_digest()
-    vectors = embedder.embed([record.chunk.text for record in records])
+    vectors = embedder.embed_documents([record.chunk.text for record in records])
 
     if embedder.model_digest() != digest:
         raise ValueError("The embedding model changed during indexing. Try again.")
@@ -96,6 +97,9 @@ def build_index(
         embedding_digest=digest,
         vector_dimension=len(vectors[0]),
         created_at=datetime.now(UTC),
+        document_prefix=settings.embedding_document_prefix,
+        query_prefix=settings.embedding_query_prefix,
+        embedding_context_size=settings.embedding_context_size,
     )
 
     temporary_path = MANIFEST_FILE.with_suffix(".json.tmp")
@@ -119,16 +123,13 @@ def search_index(
         MANIFEST_FILE.read_text(encoding="utf-8")
     )
 
-    if (
-        manifest.embedding_model != settings.embedding_model
-        or manifest.embedding_digest != embedder.model_digest()
-    ):
-        raise ValueError(
-            "The embedding model differs from the indexed model. "
-            "Rebuild the index before searching."
-        )
+    validate_index_configuration(
+        manifest,
+        settings,
+        embedder.model_digest(),
+    )
 
-    vector = embedder.embed([query])[0]
+    vector = embedder.embed_query(query)
 
     if len(vector) != manifest.vector_dimension:
         raise ValueError("Query vector dimensions do not match the index.")

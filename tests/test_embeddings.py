@@ -74,3 +74,65 @@ def test_model_digest_is_resolved_from_installed_models() -> None:
         embedder = OllamaEmbeddingClient(client, make_settings())
 
         assert embedder.model_digest() == "example-digest"
+
+
+def test_document_and_query_prefixes_are_applied_separately() -> None:
+    requests = []
+
+    def handler(request: httpx2.Request) -> httpx2.Response:
+        body = json.loads(request.content)
+        requests.append(body)
+
+        return httpx2.Response(
+            200,
+            json={"embeddings": [[1.0, 0.0] for _ in body["input"]]},
+        )
+
+    settings = Settings(
+        _env_file=None,
+        embedding_model="test-embedding",
+        embedding_document_prefix="search_document: ",
+        embedding_query_prefix="search_query: ",
+        embedding_context_size=512,
+    )
+
+    with httpx2.Client(
+        transport=httpx2.MockTransport(handler),
+        base_url="http://localhost:11434",
+    ) as client:
+        embedder = OllamaEmbeddingClient(client, settings)
+
+        documents = embedder.embed_documents(["First passage", "Second passage"])
+        query = embedder.embed_query("Example question")
+
+    assert requests[0]["input"] == [
+        "search_document: First passage",
+        "search_document: Second passage",
+    ]
+    assert requests[1]["input"] == ["search_query: Example question"]
+    assert requests[0]["options"]["num_ctx"] == 512
+    assert documents == [[1.0, 0.0], [1.0, 0.0]]
+    assert query == [1.0, 0.0]
+
+
+def test_prefixes_do_not_make_blank_inputs_valid() -> None:
+    def handler(request: httpx2.Request) -> httpx2.Response:
+        pytest.fail("Blank inputs must be rejected before an HTTP request.")
+
+    settings = Settings(
+        _env_file=None,
+        embedding_document_prefix="search_document: ",
+        embedding_query_prefix="search_query: ",
+    )
+
+    with httpx2.Client(
+        transport=httpx2.MockTransport(handler),
+        base_url="http://localhost:11434",
+    ) as client:
+        embedder = OllamaEmbeddingClient(client, settings)
+
+        with pytest.raises(ValueError):
+            embedder.embed_documents([" "])
+
+        with pytest.raises(ValueError):
+            embedder.embed_query(" ")

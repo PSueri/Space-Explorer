@@ -27,6 +27,9 @@ class OllamaEmbeddingClient:
     ) -> None:
         self._http_client = http_client
         self._model = settings.embedding_model
+        self._document_prefix = settings.embedding_document_prefix
+        self._query_prefix = settings.embedding_query_prefix
+        self._context_size = settings.embedding_context_size
 
     def model_digest(self) -> str:
         response = self._http_client.get("/api/tags")
@@ -42,9 +45,23 @@ class OllamaEmbeddingClient:
             "Download it with ollama pull."
         )
 
-    def embed(self, texts: list[str]) -> list[list[float]]:
+    @staticmethod
+    def _validate_inputs(texts: list[str]) -> None:
         if not texts or any(not text.strip() for text in texts):
             raise ValueError("Embedding inputs must contain non-empty text.")
+
+    def embed_documents(self, texts: list[str]) -> list[list[float]]:
+        self._validate_inputs(texts)
+
+        return self.embed([self._document_prefix + text for text in texts])
+
+    def embed_query(self, text: str) -> list[float]:
+        self._validate_inputs([text])
+
+        return self.embed([self._query_prefix + text])[0]
+
+    def embed(self, texts: list[str]) -> list[list[float]]:
+        self._validate_inputs(texts)
 
         response = self._http_client.post(
             "/api/embed",
@@ -53,7 +70,7 @@ class OllamaEmbeddingClient:
                 "input": texts,
                 "truncate": False,
                 "keep_alive": "0",
-                "options": {"num_ctx": 512},
+                "options": {"num_ctx": self._context_size},
             },
         )
         response.raise_for_status()

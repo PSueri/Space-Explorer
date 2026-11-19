@@ -5,6 +5,7 @@ import httpx2
 from qdrant_client import QdrantClient
 
 from backend.app.core.exceptions import RetrievalUnavailableError
+from backend.app.core.index_configuration import validate_index_configuration
 from backend.app.core.settings import PROJECT_ROOT, Settings
 from backend.app.integrations.ollama_embeddings import OllamaEmbeddingClient
 from backend.app.models.retrieval import IndexManifest, RetrievalBatch
@@ -60,15 +61,13 @@ class LocalDocumentRetriever:
         ) as http_client:
             embedder = OllamaEmbeddingClient(http_client, self._settings)
 
-            if (
-                manifest.embedding_model != self._settings.embedding_model
-                or manifest.embedding_digest != embedder.model_digest()
-            ):
-                raise ValueError(
-                    "The configured embedding model differs from the index."
-                )
+            validate_index_configuration(
+                manifest,
+                self._settings,
+                embedder.model_digest(),
+            )
 
-            vector = embedder.embed([question])[0]
+            vector = embedder.embed_query(question)
 
         if len(vector) != manifest.vector_dimension:
             raise ValueError("The query vector has incompatible dimensions.")
